@@ -27,7 +27,7 @@ public class Main : MonoBehaviour
     private Coord coord2;
     //-------------------------------------------------------------------------------------------------------------------------
     public float stepMove = 0.01f;  // разобраться почему не работает *?????????????????????????????????????????????????????????
-    private bool block = true; // Для блокировки одновременных действий. Своеобразный поток
+    //private bool block = true; // Для блокировки одновременных действий. Своеобразный поток
     //private bool chekDestroyBonusJelly = false;
     private List<Coord []> coordsDestroy = new List<Coord []>(); // Список координат для удаления из них желеек
     private List<Trap> Traps = new List<Trap>(); // Список ловушек
@@ -165,7 +165,7 @@ public class Main : MonoBehaviour
     }
     private void destroyTrap(Coord coordTrap) // уничтожает ловушку и при необходимости создаёт на её месте другую низшего уровня
     {
-        block = false;
+        //block = false;
         int lvlTrap = 0;
         int typeTrap = 0;
         foreach (GameObject item in TrapsObject)
@@ -179,7 +179,7 @@ public class Main : MonoBehaviour
                     //print("++++++++++++++++++++++++++");
                     TrapsObject.Remove(item);
                     Destroy(item);
-                    block = true;
+                    //block = true;
                     return;                   
                 }
                 else 
@@ -189,17 +189,17 @@ public class Main : MonoBehaviour
                     TrapsObject.Remove(item);
                     Destroy(item); 
                     setTrap(typeTrap, lvlTrap, coordTrap);
-                    block = true;
+                    //block = true;
                     return;
                     //item.GetComponent<Trap>().removeLvlTrap();
                 }
             }
         }
-        block = true;
+        //block = true;
     }
     private bool moveSearch() // Метод проверяющий возможность стирания
     {
-        block = false;
+        //block = false;
         copyAllJelly = AllJelly.Clone() as GameObject[,];
         GameObject temporalObject = null;
         GameObject returnTrap = null;
@@ -278,12 +278,12 @@ public class Main : MonoBehaviour
         }
         print("Выводит что нечего стирать!");
         copyAllJelly = null;
-        block = true;
+        //block = true;
         return false;
     }
     private void mixing() // Метод перемешивающий желейки ( Если нет хода для стирания) (не учтены ловушки)(вроде учтены)
     {
-        block = false;
+        //block = false;
         Coord [,] mixingCoords = new Coord[xSize, ySize - 1];
         GameObject [,] mixingObjects = new GameObject[xSize, ySize - 1]; 
         GameObject mixing = null;
@@ -328,7 +328,7 @@ public class Main : MonoBehaviour
         }
         mixingCoords = null;
         mixingObjects = null;
-        block = true;
+        //block = true;
     }
     public void WindowGame(int _xSize, int _ySize) // Создание Ячеек под уровень
     {
@@ -380,10 +380,10 @@ public class Main : MonoBehaviour
     }
     public bool MoveJelly() // перемещение желеек в процессе стирания (если true - движение было)
     {
-        block = false;
+        //block = false;
         bool returnChek = false;
-        if(BlockAction())
-        {
+        //if(BlockAction())
+        //{
             for (int i = 0; i < xSize; i++)
             {
                 for (int j = 1; j < ySize; j++)
@@ -407,23 +407,23 @@ public class Main : MonoBehaviour
                 }
             } 
             Filling();
-        } 
-        block = true;
+        //} 
+        //block = true;
         return returnChek;
     }
     public bool MoveJellyLeftRight() // для сдвига желеек под ловушками и т.п.
     {
-        block = false;
-        bool returnChek = false;
-        if(BlockAction())
-        {
+        //block = false;
+        //bool returnChek = false;
+        //if(BlockAction())
+        //{
             for (int i = 0; i < xSize; i++)
             {
                 for (int j = 1; j < ySize; j++)
                 {
-                    if((AllJelly[i, j] != null && !scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
-                    || (AllJelly[i, j] != null && scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord) && 
-                    returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1))
+                    if(AllJelly[i, j] != null && (!scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord)
+                    || (scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord) && 
+                    returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)))
                     {
                         if(i > 0)
                         {
@@ -435,7 +435,7 @@ public class Main : MonoBehaviour
                                 jelly.GetComponent<Jelly>().setMoved(firstPosition, secondPosition, stepMove, i - 1, j - 1);
                                 AllJelly[i, j] = null;
                                 AllJelly[i - 1, j - 1] = jelly;
-                                block = true;
+                                //block = true;
                                 return true;
                             }
                             else
@@ -450,7 +450,7 @@ public class Main : MonoBehaviour
                                         jelly.GetComponent<Jelly>().setMoved(firstPosition, secondPosition, stepMove, i + 1, j - 1);
                                         AllJelly[i, j] = null;
                                         AllJelly[i + 1, j - 1] = jelly;
-                                        block = true;
+                                        //block = true;
                                         return true;
                                     }
                                 }
@@ -468,7 +468,7 @@ public class Main : MonoBehaviour
                                     jelly.GetComponent<Jelly>().setMoved(firstPosition, secondPosition, stepMove, i + 1, j - 1);
                                     AllJelly[i, j] = null;
                                     AllJelly[i + 1, j - 1] = jelly;
-                                    block = true;
+                                    //block = true;
                                     return true;
                                 }
                             }
@@ -477,9 +477,9 @@ public class Main : MonoBehaviour
                 }
             }
           Filling();
-        } 
-        block = true;
-        return returnChek;
+        //} 
+        //block = true;
+        return false;
     }
     public GameObject MakingJellyIndex(int num) // Создание желеек GameObject по индексу
     {
@@ -549,7 +549,7 @@ public class Main : MonoBehaviour
     }
     public bool checkDestroy(GameObject [,] allJelly) // Проверка есть ли что стирать (если есть что возвращает true)
     {
-        block = false;
+        //block = false;
         coordsDestroy.Clear();
         GameObject objectJelly = null;
         GameObject returnTrap = null;
@@ -694,7 +694,7 @@ public class Main : MonoBehaviour
                 }
             }
         }
-        block = true;
+        //block = true;
         if(coordsDestroy.Count == 0)
         {
             return false;
@@ -707,7 +707,7 @@ public class Main : MonoBehaviour
     public void Erasing() // стирание желеек (происходит от checkDestroy)
     {
         checkDestroy(AllJelly);
-        block = false;
+        //block = false;
         bool check = true;
         while(check)
         {
@@ -828,7 +828,7 @@ public class Main : MonoBehaviour
                 MoveJelly();
             }
         }
-        block = true;
+        //block = true;
     }
     public void shortestDistance (Vector3 PositionClick) // получение обьекта на определённом расстоянии
     {
@@ -857,7 +857,7 @@ public class Main : MonoBehaviour
     }
     private void destroyBonusJelly(GameObject jellyBonus) // Работа бонусных желеек
     {
-        block = false;
+        //block = false;
         if(jellyBonus == null)
         {
             return;
@@ -1120,7 +1120,7 @@ public class Main : MonoBehaviour
             default:
             break;
         }
-        block = true;
+        //block = true;
     }
     public Coord [] directionOfTravel(Vector3 secondVector) // Определение в каком направлении перемещается выбранная желейка
     {
@@ -1195,8 +1195,9 @@ public class Main : MonoBehaviour
     {
         WindowGame(7, 8);
     }
-    private void OnMouseDown() {
-        if(block && BlockAction() && movedJelly == null)
+    private void OnMouseDown() 
+    {
+        if(BlockAction() && movedJelly == null)
         {
             firstVector = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             shortestDistance(firstVector);
@@ -1210,7 +1211,8 @@ public class Main : MonoBehaviour
             }
         }
     }
-    private void OnMouseUp() {
+    private void OnMouseUp() 
+    {
         if (movedJelly != null & coordMovedJellyThird == null)
         {
             if(movedJelly.GetComponent<Jelly>().bonus)
@@ -1228,7 +1230,7 @@ public class Main : MonoBehaviour
             coordMovedJellyThird = null;          
         }
     }
-    async private void movementJellys()
+    async private void movementJellys() // Работа физики игры
     {
         while(true)
         {
