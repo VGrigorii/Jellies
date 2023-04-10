@@ -52,7 +52,7 @@ public class Main : MonoBehaviour
     private Vector3 secondVector;
     private Coord coordMovedJellyFirst;
     private Coord coordMovedJellySecond;
-    private Coord coordMovedJellyThree;
+    private Coord coordMovedJellyThird;
     private Coord [] coordsMove;
     private GameObject changeableJelly;
 //----------------------------------------------------------------------------------------------------------------------------
@@ -1211,7 +1211,7 @@ public class Main : MonoBehaviour
         }
     }
     private void OnMouseUp() {
-        if (movedJelly != null & coordMovedJellyThree == null)
+        if (movedJelly != null & coordMovedJellyThird == null)
         {
             if(movedJelly.GetComponent<Jelly>().bonus)
             {
@@ -1225,7 +1225,7 @@ public class Main : MonoBehaviour
             changeableJelly = null;
             coordMovedJellyFirst = null;
             coordMovedJellySecond = null;
-            coordMovedJellyThree = null;          
+            coordMovedJellyThird = null;          
         }
     }
     async private void movementJellys()
@@ -1240,14 +1240,14 @@ public class Main : MonoBehaviour
                 }
                 else
                 {
-                    if(coordMovedJellyThree == null)
+                    if(coordMovedJellyThird == null)
                     {
                         Vector3 a = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                         coordsMove = directionOfTravel(a);
 
                         if(coordsMove[1] != null && !scanTraps(coordsMove[1]))
                         {
-                            coordMovedJellyThree = new Coord(coordsMove[1].x, coordsMove[1].y);                        
+                            coordMovedJellyThird = new Coord(coordsMove[1].x, coordsMove[1].y);                        
 
                             if(AllJelly[coordsMove[1].x, coordsMove[1].y] != null)
                             {
@@ -1313,11 +1313,11 @@ public class Main : MonoBehaviour
                                 movedJelly.GetComponent<Jelly>().coord.x = coordMovedJellyFirst.x;
                                 movedJelly.GetComponent<Jelly>().coord.y = coordMovedJellyFirst.y;
                                 AllJelly[coordsMove[0].x, coordsMove[0].y] = movedJelly;
-                                changeableJelly.GetComponent<Jelly>().setMoved(changeableJelly.transform.position, new Vector3(((coordMovedJellyThree.x*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainX/100
-                                ,(((coordMovedJellyThree.y + 1)*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainY/100, 0));
+                                changeableJelly.GetComponent<Jelly>().setMoved(changeableJelly.transform.position, new Vector3(((coordMovedJellyThird.x*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainX/100
+                                ,(((coordMovedJellyThird.y + 1)*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainY/100, 0));
                                 changeableJelly.GetComponent<Jelly>().coord.x = coordMovedJellySecond.x;
                                 changeableJelly.GetComponent<Jelly>().coord.y = coordMovedJellySecond.y;
-                                AllJelly[coordMovedJellyThree.x, coordMovedJellyThree.y] = changeableJelly;
+                                AllJelly[coordMovedJellyThird.x, coordMovedJellyThird.y] = changeableJelly;
                                 
                             }
                             else
@@ -1336,7 +1336,7 @@ public class Main : MonoBehaviour
                             changeableJelly = null;
                             coordMovedJellyFirst = null;
                             coordMovedJellySecond = null;
-                            coordMovedJellyThree = null;
+                            coordMovedJellyThird = null;
                             return;
                         }
                         else
@@ -1363,7 +1363,7 @@ public class Main : MonoBehaviour
                             changeableJelly = null;
                             coordMovedJellyFirst = null;
                             coordMovedJellySecond = null;
-                            coordMovedJellyThree = null;  
+                            coordMovedJellyThird = null;  
                             Playback();
                             return;                 
                         }
