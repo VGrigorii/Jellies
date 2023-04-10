@@ -21,7 +21,7 @@ public class Main : MonoBehaviour
     public GameObject Ice_3; // обьект желейки префаб
     public GameObject Caramel_1; // обьект желейки префаб
     public GameObject Caramel_2; // обьект желейки префаб
-    public GameObject Caramel_3;
+    public GameObject Caramel_3; // обьект желейки префаб
     //----------------------------------------------------------- Временные для теста -----------------------------------------
     private Coord coord1;
     private Coord coord2;
