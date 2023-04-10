@@ -18,7 +18,7 @@ public class Main : MonoBehaviour
     public GameObject jellyBomb; // обьект желейки префаб
     public GameObject Ice_1; // обьект желейки префаб
     public GameObject Ice_2; // обьект желейки префаб
-    public GameObject Ice_3; 
+    public GameObject Ice_3; // обьект желейки префаб
     public GameObject Caramel_1;
     public GameObject Caramel_2;
     public GameObject Caramel_3;
