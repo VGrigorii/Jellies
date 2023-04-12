@@ -248,7 +248,7 @@ public class Main : MonoBehaviour
                 }
                 if(i < xSize - 1)
                 {
-                    if(copyAllJelly[i + 1, j] != null && !copyAllJelly[i,j + 1].GetComponent<Jelly>().bonus && returnTraps(copyAllJelly[i + 1,j].GetComponent<Jelly>().coord) == null)
+                    if(copyAllJelly[i + 1, j] != null && !copyAllJelly[i + 1,j].GetComponent<Jelly>().bonus && returnTraps(copyAllJelly[i + 1,j].GetComponent<Jelly>().coord) == null)
                     {
                         continue;
                     }
