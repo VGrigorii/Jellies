@@ -31,8 +31,6 @@ public class Main : MonoBehaviour
     private GameObject secondGameObjectСlue; // обьекты для подсказки
     private bool counterReset = false; // переменная для подсказки
     public float stepMove = 0.01f;  // разобраться почему не работает *?????????????????????????????????????????????????????????
-    //private bool block = true; // Для блокировки одновременных действий. Своеобразный поток
-    //private bool chekDestroyBonusJelly = false;
     private bool GameRun; // Для остановки потоков при закрытии игры
     private List<Coord []> coordsDestroy = new List<Coord []>(); // Список координат для удаления из них желеек
     private List<Trap> Traps = new List<Trap>(); // Список ловушек
@@ -863,7 +861,7 @@ public class Main : MonoBehaviour
         Coord coordPosition = new Coord(jellyBonus.GetComponent<Jelly>().coord.x, jellyBonus.GetComponent<Jelly>().coord.y);
         switch(jellyBonus.GetComponent<Jelly>().getIndexJelly())
         {
-            case 5: // --------------------------------------------- LeftRight ----------------------------------
+            case 6: // --------------------------------------------- LeftRight ----------------------------------
             AllJelly[coordPosition.x ,coordPosition.y] = null;
             for (int i = 0; i < xSize; i++)
             {
@@ -910,46 +908,7 @@ public class Main : MonoBehaviour
                 }
             }
             break;
-            case 8:  // ----------------------------------------- Bow ----------------------------
-            AllJelly[coordPosition.x ,coordPosition.y] = null;
-            int index = 99;
-            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus)
-            {
-                index = changeableJelly.GetComponent<Jelly>().getIndexJelly();
-            }
-            else
-            {
-                index = random.Next(numberOfColors);
-            }    
-            for (int i = 0; i < xSize; i++)
-            {
-                for (int j = 0; j < ySize - 1; j++)
-                {
-                    if(AllJelly[i,j] != null)
-                    {
-                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && !scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
-                        {
-                            AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
-                            AllJelly[i,j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                        }
-                        else
-                        {
-                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
-                            {
-                                
-                                if(returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
-                                {
-                                    AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
-                                    AllJelly[i,j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                                }
-                                destroyTrap(AllJelly[i,j].GetComponent<Jelly>().coord);
-                            }
-                        }
-                    }
-                }
-            }
-            break;
-            case 6: // ------------------------------- UpDown -----------------------------------------------
+            case 7: // ------------------------------- UpDown -----------------------------------------------
             AllJelly[coordPosition.x ,coordPosition.y] = null;
             for (int i = 0; i < ySize - 1; i++)
             {
@@ -996,7 +955,7 @@ public class Main : MonoBehaviour
             }            
             break;
 
-            case 7: // --------------------------------------------- Bomb ---------------------------------------
+            case 8: // --------------------------------------------- Bomb ---------------------------------------
             
             AllJelly[coordPosition.x ,coordPosition.y] = null;
             for (int i = 0; i < 3; i++)
@@ -1105,6 +1064,45 @@ public class Main : MonoBehaviour
                                     }
                                     destroyTrap(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord);
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+            case 9:  // ----------------------------------------- Bow ----------------------------
+            AllJelly[coordPosition.x ,coordPosition.y] = null;
+            int index = 99;
+            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus)
+            {
+                index = changeableJelly.GetComponent<Jelly>().getIndexJelly();
+            }
+            else
+            {
+                index = random.Next(numberOfColors);
+            }    
+            for (int i = 0; i < xSize; i++)
+            {
+                for (int j = 0; j < ySize - 1; j++)
+                {
+                    if(AllJelly[i,j] != null)
+                    {
+                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && !scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
+                        {
+                            AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
+                            AllJelly[i,j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                        }
+                        else
+                        {
+                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
+                            {
+                                
+                                if(returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                {
+                                    AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
+                                    AllJelly[i,j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                }
+                                destroyTrap(AllJelly[i,j].GetComponent<Jelly>().coord);
                             }
                         }
                     }
