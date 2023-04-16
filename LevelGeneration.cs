@@ -29,7 +29,7 @@ public class LevelGeneration
                 bool chek = true;
                 while(chek)
                 {
-                    int random = new Random().Next(indexColor); 
+                    int random = (new Random().Next(indexColor)) + 1; 
                     if(i > 1)
                     {
                         if(returnInt[i - 1, j] != random && returnInt[i - 2, j] != random)
@@ -68,6 +68,16 @@ public class LevelGeneration
                 }
             }
         }
+        //--------------------------------------------------- Для проверки ----------------------------------------------------------------
+        returnInt[6,6] = 0;
+        returnInt[0,6] = 0;
+        returnInt[5,6] = 0;
+        returnInt[1,6] = 0;
+        returnInt[6,5] = 0;
+        returnInt[0,5] = 0;
+        returnInt[2,2] = 0;
+        returnInt[4,2] = 0;
+        //---------------------------------------------------------------------------------------------------------------------------------
         return returnInt;
     }
     

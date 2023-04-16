@@ -7,6 +7,7 @@ using Random = System.Random;
 public class Main : MonoBehaviour
 {
     public Canvas canvas; // Для получения размера экрана
+    public GameObject emptyCell; // обьект пустой ячейки префаб
     public GameObject jellyGreen; // обьект желейки префаб
     public GameObject jellyBlue; // обьект желейки префаб
     public GameObject jellyRad; // обьект желейки префаб
@@ -45,7 +46,7 @@ public class Main : MonoBehaviour
     private int xCorect = 100; // сдвиг от краёв для canvas
     private GameObject [,] AllJelly; // сетка обьектов уровня
     private GameObject [,] copyAllJelly; // для проверки возможности перемещения
-    public int numberOfColors = 3; // Количество цветов в раунде
+    public int numberOfColors = 5; // Количество цветов в раунде
     private bool direction; // направление стирания
     private Coord checkUnitsCoord; // переменная для создания бонусных желеек (бомбочек)
     private int [, ] LevelJelly; // Для создания первоночального расположения желеек
@@ -89,6 +90,10 @@ public class Main : MonoBehaviour
         {
             for (int j = 0; j < ySize - 1; j++)
             {
+                if(AllJelly[i, j].GetComponent<Jelly>().getIndexJelly() == 0)
+                {
+                    continue;
+                }
                 GameObject edging = Instantiate<GameObject>(Edging);
                 edging.transform.position = new Vector3(((i*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainX/100
                 ,(((j + 1)*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainY/100, 1);
@@ -152,21 +157,6 @@ public class Main : MonoBehaviour
             trapObject.transform.localScale = new Vector3(sizeCell, sizeCell, sizeCell);
         }
     }
-    private bool scanTraps(Coord coordTrap) // проверять наличие ловушки в координате
-    {
-        if(TrapsObject.Count == 0)
-        {
-            return false;
-        }
-        foreach (GameObject item in TrapsObject)
-        {
-            if(item.GetComponent<Trap>().coord.Equals(coordTrap))
-            {
-                return true;
-            }
-        } 
-        return false;
-    }
     private GameObject returnTraps(Coord coordTrap) // возвращает обьект ловушку
     {
         if(TrapsObject.Count == 0)
@@ -225,14 +215,15 @@ public class Main : MonoBehaviour
                 {
                     returnTrap = returnTraps(copyAllJelly[i,j].GetComponent<Jelly>().coord);
                 }
-                if(temporalObject == null || returnTrap != null || temporalObject.GetComponent<Jelly>().bonus)
+                if(temporalObject == null || returnTrap != null || temporalObject.GetComponent<Jelly>().bonus || temporalObject.GetComponent<Jelly>().getIndexJelly() == 0)
                 {
                     continue;
                 }
                 if(j < ySize - 2)
                 {
                     if(copyAllJelly[i,j + 1] != null && !copyAllJelly[i,j + 1].GetComponent<Jelly>().bonus && 
-                        returnTraps(copyAllJelly[i,j + 1].GetComponent<Jelly>().coord) != null)
+                        returnTraps(copyAllJelly[i,j + 1].GetComponent<Jelly>().coord) == null &&
+                        copyAllJelly[i,j + 1].GetComponent<Jelly>().getIndexJelly() != 0)
                     {                    
                         copyAllJelly[i,j] = copyAllJelly[i,j + 1];
                         copyAllJelly[i,j + 1] = temporalObject;
@@ -255,7 +246,8 @@ public class Main : MonoBehaviour
                 if(i < xSize - 1)
                 {
                     if(copyAllJelly[i + 1, j] != null && !copyAllJelly[i + 1,j].GetComponent<Jelly>().bonus && 
-                        returnTraps(copyAllJelly[i + 1,j].GetComponent<Jelly>().coord) != null)
+                        returnTraps(copyAllJelly[i + 1,j].GetComponent<Jelly>().coord) == null &&
+                        copyAllJelly[i + 1,j].GetComponent<Jelly>().getIndexJelly() != 0)
                     {
                         continue;
                     }
@@ -283,13 +275,12 @@ public class Main : MonoBehaviour
             for (int j = 0; j < ySize - 1; j++)
             {
                 if(copyAllJelly[i,j] != null)
-                {
-                    
-                if(AllJelly[i,j].GetComponent<Jelly>().bonus)
-                {
-                    copyAllJelly = null;
-                    return true;
-                }
+                {                    
+                    if(copyAllJelly[i,j].GetComponent<Jelly>().bonus)
+                    {
+                        copyAllJelly = null;
+                        return true;
+                    }
                 }
             }
         }
@@ -307,13 +298,15 @@ public class Main : MonoBehaviour
         {
             for (int j = 0; j < ySize - 1; j++)
             {
-                if(AllJelly[i,j] != null && !scanTraps(AllJelly[i,j].GetComponent<Jelly>().coord))
+                if(AllJelly[i,j] != null && returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord) == null &&
+                    AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() != 0)
                 {
                     int xRand = random.Next(xSize);
                     int yRand = random.Next(ySize - 1);
                     mixing = AllJelly[i,j]; 
                     randomObj = AllJelly[xRand, yRand];
-                    if(AllJelly[xRand, yRand] != null && !scanTraps(AllJelly[xRand, yRand].GetComponent<Jelly>().coord))
+                    if(AllJelly[xRand, yRand] != null && returnTraps(AllJelly[xRand, yRand].GetComponent<Jelly>().coord) == null &&
+                        AllJelly[xRand, yRand].GetComponent<Jelly>().getIndexJelly() != 0)
                     {
                         mixingObjects[i, j] = mixing;
                         AllJelly[i,j] = null;
@@ -366,10 +359,14 @@ public class Main : MonoBehaviour
         SizeCanvasMainY = ySize * sizeCell;        
         for (int i = 0; i < xSize; i++)
         {
+            if(AllJelly[i, ySize - 1] != null)
+            {
+                continue;
+            }
             if(AllJelly[i, ySize - 1] == null){
                 GameObject jelly = randomMakingColor(numberOfColors);
                 jelly.GetComponent<Jelly>().coord = new Coord(i, ySize - 1);
-                AllJelly[i,ySize - 1] = jelly;
+                AllJelly[i, ySize - 1] = jelly;
                 jelly.transform.position = new Vector3(((i*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainX/100
                 ,((ySize*sizeCell) + (sizeCell/2))/50 - SizeCanvasMainY/100);
                 jelly.transform.localScale = new Vector3(sizeCell, sizeCell, sizeCell);
@@ -403,7 +400,8 @@ public class Main : MonoBehaviour
             {
                 if(AllJelly[i, j] != null && (returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) == null
                 || (returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) != null && 
-                returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)))
+                returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)) &&
+                AllJelly[i, j].GetComponent<Jelly>().getIndexJelly() != 0)
                 {
                     if(AllJelly[i, j - 1] == null)
                     {
@@ -414,12 +412,11 @@ public class Main : MonoBehaviour
                         AllJelly[i, j] = null;
                         AllJelly[i, j - 1] = jelly;
                         returnChek = true;
-                    }
-                        
+                    }                        
                 }
             }
         } 
-        Filling();
+        //Filling();
         return returnChek;
     }
     public bool MoveJellyLeftRight() // для сдвига желеек под ловушками и т.п.
@@ -430,7 +427,8 @@ public class Main : MonoBehaviour
             {
                 if(AllJelly[i, j] != null && (returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) == null
                 || (returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) != null && 
-                returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)))
+                returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)) &&
+                AllJelly[i, j].GetComponent<Jelly>().getIndexJelly() != 0)
                 {
                     if(i > 0)
                     {
@@ -480,7 +478,7 @@ public class Main : MonoBehaviour
                 }
             }
         }
-        Filling();
+        //Filling();
         return false;
     }
     public GameObject MakingJellyIndex(int num) // Создание желеек GameObject по индексу
@@ -488,26 +486,30 @@ public class Main : MonoBehaviour
         GameObject jelly;
         switch (num)
         {
-            case 0: return jelly = Instantiate<GameObject>(jellyGreen);
-            case 1: return jelly = Instantiate<GameObject>(jellyBlue);
-            case 2: return jelly = Instantiate<GameObject>(jellyRad);
-            case 3: return jelly = Instantiate<GameObject>(jellyYellow);
-            case 4: return jelly = Instantiate<GameObject>(jellyPink);
+            case 1: return jelly = Instantiate<GameObject>(jellyGreen);
+            case 2: return jelly = Instantiate<GameObject>(jellyBlue);
+            case 3: return jelly = Instantiate<GameObject>(jellyRad);
+            case 4: return jelly = Instantiate<GameObject>(jellyYellow);
+            case 5: return jelly = Instantiate<GameObject>(jellyPink);
+            case 6: return jelly = Instantiate<GameObject>(jellyLeftRight);
+            case 7: return jelly = Instantiate<GameObject>(jellyUpDown);
+            case 8: return jelly = Instantiate<GameObject>(jellyBomb);
+            case 9: return jelly = Instantiate<GameObject>(jellyBow);
             default:
-            return jelly = Instantiate<GameObject>(jellyGreen);
+            return jelly = Instantiate<GameObject>(emptyCell);
         }
     }
     public GameObject randomMakingColor(int quantityColor) // Случайный выбор генерируемой желейки
     {
         GameObject jelly;
-        int rand = random.Next(quantityColor);
+        int rand = (random.Next(quantityColor)) + 1;
         switch (rand)
         {
-            case 0: return jelly = Instantiate<GameObject>(jellyGreen);
-            case 1: return jelly = Instantiate<GameObject>(jellyBlue);
-            case 2: return jelly = Instantiate<GameObject>(jellyRad);
-            case 3: return jelly = Instantiate<GameObject>(jellyYellow);
-            case 4: return jelly = Instantiate<GameObject>(jellyPink);
+            case 1: return jelly = Instantiate<GameObject>(jellyGreen);
+            case 2: return jelly = Instantiate<GameObject>(jellyBlue);
+            case 3: return jelly = Instantiate<GameObject>(jellyRad);
+            case 4: return jelly = Instantiate<GameObject>(jellyYellow);
+            case 5: return jelly = Instantiate<GameObject>(jellyPink);
             default:
             return jelly = Instantiate<GameObject>(jellyGreen);
         }
@@ -565,7 +567,8 @@ public class Main : MonoBehaviour
                 {
                     returnTrap = returnTraps(allJelly[i,j].GetComponent<Jelly>().coord);
                 }
-                if(allJelly[i,j] == null || (returnTrap != null && returnTrap.GetComponent<Trap>().getTypeTrap() != 1)) // Если появятся ячейки пустые в которые не сможет упасть желе или является закрыта ловушкой
+                if(allJelly[i,j] == null || (returnTrap != null && returnTrap.GetComponent<Trap>().getTypeTrap() != 1) ||
+                    allJelly[i,j].GetComponent<Jelly>().getIndexJelly() == 0) // Если появятся ячейки пустые в которые не сможет упасть желе или является закрыта ловушкой
                 {
                     if(iter > 2)
                     {
@@ -635,7 +638,8 @@ public class Main : MonoBehaviour
                 {
                     returnTrap = returnTraps(allJelly[i,j].GetComponent<Jelly>().coord);
                 }
-                if(allJelly[i,j] == null || (returnTrap != null && returnTrap.GetComponent<Trap>().getTypeTrap() != 1))  // Если появятся ячейки пустые в которые не сможет упасть желе или является закрыта ловушкой
+                if(allJelly[i,j] == null || (returnTrap != null && returnTrap.GetComponent<Trap>().getTypeTrap() != 1) ||
+                    allJelly[i,j].GetComponent<Jelly>().getIndexJelly() == 0)  // Если появятся ячейки пустые в которые не сможет упасть желе или является закрыта ловушкой
                 {
                     if(iter > 2)
                     {
@@ -782,7 +786,7 @@ public class Main : MonoBehaviour
                     {
                         Coord coordDestroy = new Coord(AllJelly[maxCount[i].x,maxCount[i].y].GetComponent<Jelly>().coord.x,
                                                        AllJelly[maxCount[i].x,maxCount[i].y].GetComponent<Jelly>().coord.y); 
-                        if(scanTraps(coordDestroy) && returnTraps(coordDestroy).GetComponent<Trap>().getTypeTrap() == 1)
+                        if(returnTraps(coordDestroy) != null && returnTraps(coordDestroy).GetComponent<Trap>().getTypeTrap() == 1)
                         {
                             destroyTrap(coordDestroy);
                         }
@@ -829,7 +833,7 @@ public class Main : MonoBehaviour
     }
     public void shortestDistance (Vector3 PositionClick) // получение обьекта на определённом расстоянии
     {
-        float minDistance = 1f;
+        float minDistance = 0.5f;
         for (int i = 0; i < xSize; i++)
         {
             for (int j = 0; j < ySize - 1; j++)
@@ -890,19 +894,23 @@ public class Main : MonoBehaviour
                     }
                     else
                     {
-                        if(!scanTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord))
+                        if(returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord) == null && 
+                            AllJelly[i, coordPosition.y].GetComponent<Jelly>().getIndexJelly() != 0)
                         {
                             AllJelly[i, coordPosition.y].GetComponent<Jelly>().MoveProgress = false;
                             AllJelly[i, coordPosition.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                         }
                         else
                         {
-                            if(returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            if(AllJelly[i, coordPosition.y].GetComponent<Jelly>().getIndexJelly() != 0)
                             {
-                                AllJelly[i, coordPosition.y].GetComponent<Jelly>().MoveProgress = false;
-                                AllJelly[i, coordPosition.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                if(returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                {
+                                    AllJelly[i, coordPosition.y].GetComponent<Jelly>().MoveProgress = false;
+                                    AllJelly[i, coordPosition.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                }
+                                destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
                             }
-                            destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
                         }                        
                     }
                 }
@@ -936,19 +944,24 @@ public class Main : MonoBehaviour
                     }
                     else
                     {
-                        if(!scanTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord))
+                        if(returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord) == null && 
+                            AllJelly[coordPosition.x, i].GetComponent<Jelly>().getIndexJelly() != 0)
                         {
                             AllJelly[coordPosition.x, i].GetComponent<Jelly>().MoveProgress = false;
                             AllJelly[coordPosition.x, i].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                         }
                         else
                         {
-                            if(returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            if(AllJelly[coordPosition.x, i].GetComponent<Jelly>().getIndexJelly() != 0)
                             {
-                                AllJelly[coordPosition.x, i].GetComponent<Jelly>().MoveProgress = false;
-                                AllJelly[coordPosition.x, i].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                if(returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                {
+                                    AllJelly[coordPosition.x, i].GetComponent<Jelly>().MoveProgress = false;
+                                    AllJelly[coordPosition.x, i].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                }
+                                destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
                             }
-                            destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
+                            
                         }
                     }
                 }
@@ -972,19 +985,23 @@ public class Main : MonoBehaviour
                         }
                         else
                         {
-                            if(!scanTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord))
+                            if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord) == null &&
+                                AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().getIndexJelly() != 0)
                             {
                                 AllJelly[(coordPosition.x  - 1) + i, coordPosition.y + 2].GetComponent<Jelly>().MoveProgress = false;
                                 AllJelly[(coordPosition.x  - 1) + i, coordPosition.y + 2].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                             }
                             else
                             {
-                                if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                if(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().getIndexJelly() != 0)
                                 {
-                                    AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().MoveProgress = false;
-                                    AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                    if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                    {
+                                        AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().MoveProgress = false;
+                                        AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                    }
+                                    destroyTrap(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord);
                                 }
-                                destroyTrap(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y + 2)].GetComponent<Jelly>().coord);
                             }
                         }
                     }
@@ -1002,20 +1019,23 @@ public class Main : MonoBehaviour
                         }
                         else 
                         {
-                            if(!scanTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord))
+                            if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord) == null &&
+                                AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().getIndexJelly() != 0)
                             {
                                 AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().MoveProgress = false;
                                 AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                             }
                             else
                             {
-                                
-                                if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                if(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().getIndexJelly() != 0)
                                 {
-                                    AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().MoveProgress = false;
-                                    AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                    if(returnTraps(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                    {
+                                        AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().MoveProgress = false;
+                                        AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                    }
+                                    destroyTrap(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord);
                                 }
-                                destroyTrap(AllJelly[((coordPosition.x  - 1) + i), (coordPosition.y - 2)].GetComponent<Jelly>().coord);
                             }
                         }
                     }
@@ -1050,19 +1070,23 @@ public class Main : MonoBehaviour
                             }
                             else
                             {
-                                if(!scanTraps(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord))
+                                if(returnTraps(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord) == null &&
+                                    AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().getIndexJelly() != 0)
                                 {
                                     AllJelly[(coordPosition.x  - 2) + i, (coordPosition.y - 1) + j].GetComponent<Jelly>().MoveProgress = false;
                                     AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                                 }
                                 else
                                 {
-                                    if(returnTraps(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                    if(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().getIndexJelly() != 0)
                                     {
-                                        AllJelly[(coordPosition.x  - 2) + i, (coordPosition.y - 1) + j].GetComponent<Jelly>().MoveProgress = false;
-                                        AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                        if(returnTraps(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                                        {
+                                            AllJelly[(coordPosition.x  - 2) + i, (coordPosition.y - 1) + j].GetComponent<Jelly>().MoveProgress = false;
+                                            AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                                        }
+                                        destroyTrap(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord);
                                     }
-                                    destroyTrap(AllJelly[((coordPosition.x  - 2) + i), (coordPosition.y - 1) + j].GetComponent<Jelly>().coord);
                                 }
                             }
                         }
@@ -1073,7 +1097,7 @@ public class Main : MonoBehaviour
             case 9:  // ----------------------------------------- Bow ----------------------------
             AllJelly[coordPosition.x ,coordPosition.y] = null;
             int index = 99;
-            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus)
+            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus && changeableJelly.GetComponent<Jelly>().getIndexJelly() != 0)
             {
                 index = changeableJelly.GetComponent<Jelly>().getIndexJelly();
             }
@@ -1087,16 +1111,15 @@ public class Main : MonoBehaviour
                 {
                     if(AllJelly[i,j] != null)
                     {
-                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && !scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
+                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) == null)
                         {
                             AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
                             AllJelly[i,j].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
                         }
                         else
                         {
-                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && scanTraps(AllJelly[i, j].GetComponent<Jelly>().coord))
+                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) != null)
                             {
-                                
                                 if(returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
                                 {
                                     AllJelly[i,j].GetComponent<Jelly>().MoveProgress = false;
@@ -1230,7 +1253,7 @@ public class Main : MonoBehaviour
             shortestDistance(firstVector);
             if(movedJelly != null)
             {
-                if(returnTraps(movedJelly.GetComponent<Jelly>().coord) != null)
+                if(returnTraps(movedJelly.GetComponent<Jelly>().coord) != null || movedJelly.GetComponent<Jelly>().getIndexJelly() == 0)
                 {
                     movedJelly = null;
                 }
@@ -1275,7 +1298,7 @@ public class Main : MonoBehaviour
                         Vector3 a = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                         coordsMove = directionOfTravel(a);
 
-                        if(coordsMove[1] != null && !scanTraps(coordsMove[1]))
+                        if(coordsMove[1] != null && returnTraps(coordsMove[1]) == null && AllJelly[coordsMove[1].x, coordsMove[1].y].GetComponent<Jelly>().getIndexJelly() != 0)
                         {
                             coordMovedJellyThird = new Coord(coordsMove[1].x, coordsMove[1].y);                        
 
@@ -1414,12 +1437,14 @@ public class Main : MonoBehaviour
             {
                 if(MoveJelly())
                 {
+                    Filling();
                     continue;
                 }
                 else
                 {
                     if(MoveJellyLeftRight())
                     {
+                        Filling();
                         continue;
                     }
                     else
