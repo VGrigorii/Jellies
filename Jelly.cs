@@ -45,8 +45,8 @@ public class Jelly : MonoBehaviour
             {
                 transform.position = secondPosition;
                 progress = -1f;
-                MoveProgress = true;
                 animator.SetTrigger("AnimTrigger");
+                MoveProgress = true;
             }
             else
             {
@@ -72,7 +72,6 @@ public class Jelly : MonoBehaviour
     public void destroyJelly()
     {
         Destroy(gameObject);
-        //destroyBonusJelly = true;
     }
     public void Start() 
     {

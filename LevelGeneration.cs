@@ -77,6 +77,12 @@ public class LevelGeneration
         returnInt[0,5] = 0;
         returnInt[2,2] = 0;
         returnInt[4,2] = 0;
+        returnInt[0,7] = 0;
+        returnInt[1,7] = 0;
+        returnInt[2,7] = 0;
+        returnInt[6,7] = 0;
+        returnInt[5,7] = 0;
+        returnInt[4,7] = 0;
         //---------------------------------------------------------------------------------------------------------------------------------
         return returnInt;
     }

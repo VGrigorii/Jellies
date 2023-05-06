@@ -9,6 +9,10 @@ public class Coord
         x = _x;
         y = _y;
     }
+    public Coord(Coord _coord) {
+       x = _coord.x;
+       y = _coord.y;
+    }
     // override object.Equals
     public override bool Equals(object obj)
     {        
