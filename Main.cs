@@ -773,7 +773,7 @@ public class Main : MonoBehaviour
             return true;
         }
     }
-    public void Erasing() // стирание желеек (происходит от checkDestroy)
+    public void erasing() // стирание желеек
     {
         bool check = true;
         //--------------------------------------------- Всплывающие очки -----------------------------------------------
@@ -784,6 +784,7 @@ public class Main : MonoBehaviour
         //   numberOfCells += item.Length;
         //}
         //points.GetComponent<Points>().Scoring(numberOfCells, coordsDestroy.Count, new Vector3(0, 0, -2));
+        
         //--------------------------------------------------------------------------------------------------------------
         while(check)
         {
@@ -931,137 +932,61 @@ public class Main : MonoBehaviour
             coordMovedJellyFirst = new Coord(movedJelly.GetComponent<Jelly>().coord.x, movedJelly.GetComponent<Jelly>().coord.y);
         }
     }
-    private void destroyBonusJelly(GameObject jellyBonus) // Работа бонусных желеек
+    private void bonusBow (Coord coordPosition)
     {
-        if(jellyBonus == null)
-        {
-            return;
-        }
-        Coord coordPosition = new Coord(jellyBonus.GetComponent<Jelly>().coord.x, jellyBonus.GetComponent<Jelly>().coord.y);
-        switch(jellyBonus.GetComponent<Jelly>().getIndexJelly())
-        {
-            case 6: // --------------------------------------------- LeftRight ----------------------------------
-            AllJelly[coordPosition.x ,coordPosition.y] = null;
+        AllJelly[coordPosition.x ,coordPosition.y] = null;
+            int index = 99;
+            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus && changeableJelly.GetComponent<Jelly>().getIndexJelly() != 0)
+            {
+                index = changeableJelly.GetComponent<Jelly>().getIndexJelly();
+            }
+            else
+            {
+                index = random.Next(numberOfColors);
+            }    
             for (int i = 0; i < xSize; i++)
             {
-                Coord temporaryVariable = null;
-                if(AllJelly[i, coordPosition.y] != null && i != coordPosition.x)
+                for (int j = 0; j < ySize; j++)
                 {
-                    
-                    if(AllJelly[i, coordPosition.y].GetComponent<Jelly>().bonus)
+                    Coord temporaryVariable = null;
+                    if(AllJelly[i,j] != null)
                     {
-                        if(changeableJelly != null) // Чтобы не удалялась вновь созданая бонусная желейка
+                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) == null)
                         {
-                            if (!AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord.Equals(movedJelly.GetComponent<Jelly>().coord) &&
-                            !AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord.Equals(changeableJelly.GetComponent<Jelly>().coord))
-                            {
-                                temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
-                            }
+                            temporaryVariable = new Coord(AllJelly[i, j].GetComponent<Jelly>().coord);
                         }
                         else
                         {
-                            temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
-                        }
-                    }
-                    else
-                    {
-                        if(AllJelly[i, coordPosition.y].GetComponent<Jelly>().getIndexJelly() != 0)
-                        {
-                            if(returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord) == null || 
-                            returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord)
+                                && returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
                             {
-
-                                temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
-                                destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
+                                temporaryVariable = new Coord(AllJelly[i, j].GetComponent<Jelly>().coord);
+                                destroyTrap(AllJelly[i,j].GetComponent<Jelly>().coord);
                             }
-                            else
-                            {
-                                destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
-                            }                            
                         }
                     }
-                }
-                if (temporaryVariable != null)
-                {
-                    
-                    if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
+                    if (temporaryVariable != null)
                     {
-                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
-                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                        destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
-                    }
-                    else
-                    {
-                        Coord [] destroyCoord = new Coord[1];
-                        destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
-                        coordsDestroy.Add(destroyCoord);
+                        
+                        if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
+                        {
+                            AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
+                            AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                            destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
+                        }
+                        else
+                        {
+                            Coord [] destroyCoord = new Coord[1];
+                            destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
+                            coordsDestroy.Add(destroyCoord);
+                        }
                     }
                 }
             }
-            Erasing();
-            break;
-            case 7: // ------------------------------- UpDown -----------------------------------------------
-            AllJelly[coordPosition.x ,coordPosition.y] = null;
-            for (int i = 0; i < ySize; i++)
-            {
-                Coord temporaryVariable = null;
-                if(AllJelly[coordPosition.x, i] != null && i != coordPosition.y)
-                {
-                    if(AllJelly[coordPosition.x, i].GetComponent<Jelly>().bonus)
-                    {
-                        if(changeableJelly != null) // Чтобы не удалялась вновь созданая бонусная желейка
-                        {
-                            if (!AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord.Equals(movedJelly.GetComponent<Jelly>().coord) &&
-                            !AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord.Equals(changeableJelly.GetComponent<Jelly>().coord))
-                            {
-                                temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
-                            }
-                        }
-                        else
-                        {
-                           temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
-                        }
-                    }
-                    else
-                    {
-                        if(AllJelly[coordPosition.x, i].GetComponent<Jelly>().getIndexJelly() != 0)
-                        {
-                            if(returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord) == null || 
-                            returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
-                            {
-                                temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
-                                destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
-                            }
-                            else
-                            {
-                                destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
-                            }                            
-                        }
-                    }
-                }
-                if (temporaryVariable != null)
-                {
-                    
-                    if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
-                    {
-                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
-                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                        destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
-                    }
-                    else
-                    {
-                        Coord [] destroyCoord = new Coord[1];
-                        destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
-                        coordsDestroy.Add(destroyCoord);
-                    }
-                }
-            }  
-            Erasing();          
-            break;
-
-            case 8: // --------------------------------------------- Bomb ---------------------------------------
-            
-            AllJelly[coordPosition.x ,coordPosition.y] = null;
+    }
+    private void bonusBomb (Coord coordPosition)
+    {
+        AllJelly[coordPosition.x ,coordPosition.y] = null;
             for (int i = 0; i < 3; i++)
             {
                 Coord temporaryVariable = null;
@@ -1213,64 +1138,180 @@ public class Main : MonoBehaviour
                     }
                 }
             }
-            Erasing();
-            break;
-            case 9:  // ----------------------------------------- Bow ----------------------------
-            AllJelly[coordPosition.x ,coordPosition.y] = null;
-            int index = 99;
-            if(changeableJelly != null && !changeableJelly.GetComponent<Jelly>().bonus && changeableJelly.GetComponent<Jelly>().getIndexJelly() != 0)
+    }
+    private void bonusUpDown (Coord coordPosition)
+    {
+        AllJelly[coordPosition.x ,coordPosition.y] = null;
+            for (int i = 0; i < ySize; i++)
             {
-                index = changeableJelly.GetComponent<Jelly>().getIndexJelly();
-            }
-            else
-            {
-                index = random.Next(numberOfColors);
-            }    
-            for (int i = 0; i < xSize; i++)
-            {
-                for (int j = 0; j < ySize; j++)
+                Coord temporaryVariable = null;
+                if(AllJelly[coordPosition.x, i] != null && i != coordPosition.y)
                 {
-                    Coord temporaryVariable = null;
-                    if(AllJelly[i,j] != null)
+                    if(AllJelly[coordPosition.x, i].GetComponent<Jelly>().bonus)
                     {
-                        if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord) == null)
+                        if(changeableJelly != null) // Чтобы не удалялась вновь созданая бонусная желейка
                         {
-                            temporaryVariable = new Coord(AllJelly[i, j].GetComponent<Jelly>().coord);
-                        }
-                        else
-                        {
-                            if(AllJelly[i,j].GetComponent<Jelly>().getIndexJelly() == index && returnTraps(AllJelly[i, j].GetComponent<Jelly>().coord)
-                                && returnTraps(AllJelly[i,j].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            if (!AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord.Equals(movedJelly.GetComponent<Jelly>().coord) &&
+                            !AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord.Equals(changeableJelly.GetComponent<Jelly>().coord))
                             {
-                                temporaryVariable = new Coord(AllJelly[i, j].GetComponent<Jelly>().coord);
-                                destroyTrap(AllJelly[i,j].GetComponent<Jelly>().coord);
+                                temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
                             }
                         }
-                    }
-                    if (temporaryVariable != null)
-                    {
-                        
-                        if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
-                        {
-                            AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
-                            AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                            destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
-                        }
                         else
                         {
-                            Coord [] destroyCoord = new Coord[1];
-                            destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
-                            coordsDestroy.Add(destroyCoord);
+                           temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
+                        }
+                    }
+                    else
+                    {
+                        if(AllJelly[coordPosition.x, i].GetComponent<Jelly>().getIndexJelly() != 0)
+                        {
+                            if(returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord) == null || 
+                            returnTraps(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            {
+                                temporaryVariable = new Coord(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
+                                destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
+                            }
+                            else
+                            {
+                                destroyTrap(AllJelly[coordPosition.x, i].GetComponent<Jelly>().coord);
+                            }                            
                         }
                     }
                 }
+                if (temporaryVariable != null)
+                {
+                    
+                    if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
+                    {
+                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
+                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                        destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
+                    }
+                    else
+                    {
+                        Coord [] destroyCoord = new Coord[1];
+                        destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
+                        coordsDestroy.Add(destroyCoord);
+                    }
+                }
+            }  
+    }
+    private void bonusLeftRight(Coord coordPosition)
+    {
+        AllJelly[coordPosition.x ,coordPosition.y] = null;
+            for (int i = 0; i < xSize; i++)
+            {
+                Coord temporaryVariable = null;
+                if(AllJelly[i, coordPosition.y] != null && i != coordPosition.x)
+                {
+                    
+                    if(AllJelly[i, coordPosition.y].GetComponent<Jelly>().bonus)
+                    {
+                        if(changeableJelly != null) // Чтобы не удалялась вновь созданая бонусная желейка
+                        {
+                            if (!AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord.Equals(movedJelly.GetComponent<Jelly>().coord) &&
+                            !AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord.Equals(changeableJelly.GetComponent<Jelly>().coord))
+                            {
+                                temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
+                            }
+                        }
+                        else
+                        {
+                            temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
+                        }
+                    }
+                    else
+                    {
+                        if(AllJelly[i, coordPosition.y].GetComponent<Jelly>().getIndexJelly() != 0)
+                        {
+                            if(returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord) == null || 
+                            returnTraps(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord).GetComponent<Trap>().getTypeTrap() == 1)
+                            {
+
+                                temporaryVariable = new Coord(AllJelly[i, coordPosition.y].GetComponent<Jelly>().coord);
+                                destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
+                            }
+                            else
+                            {
+                                destroyTrap(AllJelly[i,coordPosition.y].GetComponent<Jelly>().coord);
+                            }                            
+                        }
+                    }
+                }
+                if (temporaryVariable != null)
+                {
+                    
+                    if(AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().bonus)
+                    {
+                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().MoveProgress = false;
+                        AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
+                        destroyBonusJelly(AllJelly[temporaryVariable.x, temporaryVariable.y]);
+                    }
+                    else
+                    {
+                        Coord [] destroyCoord = new Coord[1];
+                        destroyCoord[0] = new Coord (AllJelly[temporaryVariable.x, temporaryVariable.y].GetComponent<Jelly>().coord);
+                        coordsDestroy.Add(destroyCoord);
+                    }
+                }
             }
-            Erasing();
+    }
+    private void destroyBonusJelly(GameObject jellyBonus) // Работа бонусных желеек
+    {
+        if(jellyBonus == null)
+        {
+            return;
+        }
+        Coord coordPosition = new Coord(jellyBonus.GetComponent<Jelly>().coord.x, jellyBonus.GetComponent<Jelly>().coord.y);
+        switch(jellyBonus.GetComponent<Jelly>().getIndexJelly())
+        {
+            case 6: // --------------------------------------------- LeftRight ----------------------------------
+            bonusLeftRight(coordPosition);
+            break;
+            case 7: // ------------------------------- UpDown -----------------------------------------------
+            bonusUpDown(coordPosition);
+            break;
+            case 8: // --------------------------------------------- Bomb ---------------------------------------
+            bonusBomb(coordPosition);
+            break;
+            case 9:  // ----------------------------------------- Bow ----------------------------
+            bonusBow(coordPosition);
             break;
             default:
             break;
         }
     }
+    private void destroyBonusJelly(GameObject jellyBonus, bool firstBonus) // Работа бонусных желеек
+    {
+        if(jellyBonus == null)
+        {
+            return;
+        }
+        Coord coordPosition = new Coord(jellyBonus.GetComponent<Jelly>().coord.x, jellyBonus.GetComponent<Jelly>().coord.y);
+        switch(jellyBonus.GetComponent<Jelly>().getIndexJelly())
+        {
+            case 6: // --------------------------------------------- LeftRight ----------------------------------
+            bonusLeftRight(coordPosition);
+            erasing();
+            break;
+            case 7: // ------------------------------- UpDown -----------------------------------------------
+            bonusUpDown(coordPosition);
+            erasing();          
+            break;
+            case 8: // --------------------------------------------- Bomb ---------------------------------------
+            bonusBomb(coordPosition);
+            erasing();
+            break;
+            case 9:  // ----------------------------------------- Bow ----------------------------
+            bonusBow(coordPosition);
+            erasing();
+            break;
+            default:
+            break;
+        }
+    }
+
     public Coord [] directionOfTravel(Vector3 secondVector) // Определение в каком направлении перемещается выбранная желейка
     {
         float moveUp = 0f;
@@ -1408,7 +1449,7 @@ public class Main : MonoBehaviour
             {
                 movedJelly.GetComponent<Jelly>().MoveProgress = false;
                 movedJelly.GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                destroyBonusJelly(movedJelly);
+                destroyBonusJelly(movedJelly, true);
                 Playback();
             }     
             movedJelly = null;
@@ -1483,7 +1524,7 @@ public class Main : MonoBehaviour
                             {
                                 movedJelly.GetComponent<Jelly>().MoveProgress = false;
                                 movedJelly.GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                                destroyBonusJelly(movedJelly);
+                                destroyBonusJelly(movedJelly, true);
                                 movedJelly = null;     
                                 Playback();                                                  
                             }
@@ -1493,7 +1534,7 @@ public class Main : MonoBehaviour
                                 {
                                     changeableJelly.GetComponent<Jelly>().MoveProgress = false;
                                     changeableJelly.GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                                    destroyBonusJelly(changeableJelly);
+                                    destroyBonusJelly(changeableJelly, true);
                                     changeableJelly = null;
                                     Playback();
                                 }
@@ -1533,12 +1574,12 @@ public class Main : MonoBehaviour
                         }
                         else
                         {                           
-                            Erasing();
+                            erasing(); // Если убрать будет ошибочно создаваться бонусы
                             if(movedJelly.GetComponent<Jelly>().bonus)
                             {
                                 movedJelly.GetComponent<Jelly>().MoveProgress = false;
                                 movedJelly.GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                                destroyBonusJelly(movedJelly);
+                                destroyBonusJelly(movedJelly, true);
                                 Playback();
                             }
                             if(changeableJelly != null)
@@ -1547,7 +1588,7 @@ public class Main : MonoBehaviour
                                 {
                                     changeableJelly.GetComponent<Jelly>().MoveProgress = false;
                                     changeableJelly.GetComponent<Jelly>().animator.SetTrigger("AnimDestroyer");
-                                    destroyBonusJelly(changeableJelly);
+                                    destroyBonusJelly(changeableJelly, true);
                                     Playback();
                                 } 
                             }
@@ -1589,7 +1630,7 @@ public class Main : MonoBehaviour
                         
                         if(checkDestroy(AllJelly))
                         {
-                            Erasing();
+                            erasing();
                         }
                         else
                         {
